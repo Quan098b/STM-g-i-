@@ -1,9 +1,10 @@
+// đã gửi ổn nhưng chưa có nhận diện màu vàng
 #include "stm32f10x.h"
 #include "i2c.h"
 #include "tcs34725.h"
 #include "usart.h"
 #include <stdint.h>
-#include <stdio.h>
+#include <stdio.h>git
 #include <string.h>
 #include <stdarg.h>
 
