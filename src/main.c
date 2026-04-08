@@ -1,10 +1,9 @@
-// đã gửi ổn nhưng chưa có nhận diện màu vàng
 #include "stm32f10x.h"
 #include "i2c.h"
 #include "tcs34725.h"
 #include "usart.h"
 #include <stdint.h>
-#include <stdio.h>git
+#include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
 
@@ -26,14 +25,21 @@ typedef struct {
     uint8_t valid;
 } SensorResult;
 
+/* ===== MAU MOI BAN VUA LAY =====
+   1 = RED    = {746, 126, 126}
+   2 = BLUE   = {300, 319, 378}
+   3 = GREEN  = {307, 425, 266}
+   4 = YELLOW = {505, 342, 151}
+*/
 static const int16_t allowed_norm[4][3] = {
-    {744, 137, 118},
-    {278, 343, 377},
-    {292, 446, 261},
-    {333, 333, 333}
+    {746, 126, 126},  // RED
+    {300, 319, 378},  // BLUE
+    {307, 425, 266},  // GREEN
+    {505, 342, 151}   // YELLOW
 };
 
-#define MATCH_THRESHOLD         15000UL
+/* threshold tăng nhẹ để nhận 4 màu ổn hơn */
+#define MATCH_THRESHOLD         22000UL
 #define SENSOR_LOOP_DELAY_MS    10U
 #define DEBUG_PRINT_MS          150U
 #define DEBUG_UART              1
@@ -109,6 +115,12 @@ static void Sender_Output_Invalid(void)
 
 static void Sender_Output_Color(int8_t idx)
 {
+    /* mapping:
+       idx=0 -> 00 = RED
+       idx=1 -> 01 = BLUE
+       idx=2 -> 10 = GREEN
+       idx=3 -> 11 = YELLOW
+    */
     GPIO_ResetBits(TX_PORT, TX_PIN_BIT0 | TX_PIN_BIT1 | TX_PIN_VALID);
 
     if (idx & 0x01) GPIO_SetBits(TX_PORT, TX_PIN_BIT0);
@@ -202,11 +214,12 @@ static char color_char(const SensorResult *s)
 {
     if (!s->valid) return 'E';
     if (!s->match) return 'N';
+
     switch (s->idx) {
         case 0: return 'R';
         case 1: return 'B';
         case 2: return 'G';
-        case 3: return 'W';
+        case 3: return 'Y';
         default: return '?';
     }
 }
